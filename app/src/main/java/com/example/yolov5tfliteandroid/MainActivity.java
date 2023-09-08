@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 model = (String) adapterView.getItemAtPosition(i);
-                Toast.makeText(MainActivity.this, "loading model: " + model, Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "loading model: " + model, Toast.LENGTH_SHORT).show();
                 initModel(model, source);
                 if (IS_FULL_SCREEN) {
                     cameraPreviewWrap.removeAllViews();
@@ -172,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 source = (String) parent.getItemAtPosition(position);
-                Toast.makeText(MainActivity.this, "loading model: " + model, Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this, "loading model: " + source, Toast.LENGTH_SHORT).show();
                 initModel(model, source);
                 if (IS_FULL_SCREEN) {
                     cameraPreviewWrap.removeAllViews();

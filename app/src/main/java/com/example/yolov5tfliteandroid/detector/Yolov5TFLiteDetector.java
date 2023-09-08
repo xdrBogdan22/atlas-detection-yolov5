@@ -59,8 +59,8 @@ public class Yolov5TFLiteDetector {
     private final float IOU_THRESHOLD = 0.45f;
     private final float IOU_CLASS_DUPLICATED_THRESHOLD = 0.7f;
     private final String MODEL_YOLOV5S = "best-fp16.tflite";
-//    private final String MODEL_YOLOV5S = "best-fp16.tflite";
-    private final String MODEL_YOLOV5N =  "best-fp16.tflite";
+    //    private final String MODEL_YOLOV5S = "best-fp16.tflite";
+    private final String MODEL_YOLOV5N = "best-fp16.tflite";
     private final String MODEL_YOLOV5M = "best-fp16.tflite";
     private final String MODEL_YOLOV5S_INT8 = "best-fp16.tflite";
     private final String LABEL_FILE = "coco_label.txt";
@@ -77,7 +77,7 @@ public class Yolov5TFLiteDetector {
         return this.MODEL_FILE;
     }
 
-    public void setModelFile(String modelFile){
+    public void setModelFile(String modelFile) {
         switch (modelFile) {
             case "yolov5s":
                 IS_INT8 = false;
@@ -100,28 +100,28 @@ public class Yolov5TFLiteDetector {
         }
     }
 
-    public void setModelSource(String modelSource){
+    public void setModelSource(String modelSource) {
         switch (modelSource) {
             case POLICE_PATH:
                 MODEL_SOURCE = POLICE_PATH;
                 break;
             case POLICE_RO_PATH:
-                MODEL_FILE = POLICE_RO_PATH;
+                MODEL_SOURCE = POLICE_RO_PATH;
                 break;
             case POLICE_INTERNATIONAL_PATH:
-                MODEL_FILE = POLICE_INTERNATIONAL_PATH;
+                MODEL_SOURCE = POLICE_INTERNATIONAL_PATH;
                 break;
             case HOLES_PATH:
-                MODEL_FILE = HOLES_PATH;
+                MODEL_SOURCE = HOLES_PATH;
                 break;
             case WORKING_SIGN_PATH:
-                MODEL_FILE = WORKING_SIGN_PATH;
+                MODEL_SOURCE = WORKING_SIGN_PATH;
                 break;
             case WORKING_ROAD_PATH:
-                MODEL_FILE = WORKING_ROAD_PATH;
+                MODEL_SOURCE = WORKING_ROAD_PATH;
                 break;
             case GENERAL_PATH:
-                MODEL_FILE = GENERAL_PATH;
+                MODEL_SOURCE = GENERAL_PATH;
                 break;
             default:
                 Log.i("tfliteSupport", "Wrong path!");
@@ -132,8 +132,13 @@ public class Yolov5TFLiteDetector {
         return this.LABEL_FILE;
     }
 
-    public Size getInputSize(){return this.INPNUT_SIZE;}
-    public int[] getOutputSize(){return this.OUTPUT_SIZE;}
+    public Size getInputSize() {
+        return this.INPNUT_SIZE;
+    }
+
+    public int[] getOutputSize() {
+        return this.OUTPUT_SIZE;
+    }
 
     /**
      * 初始化模型, 可以通过 addNNApiDelegate(), addGPUDelegate()提前加载相应代理
@@ -144,13 +149,12 @@ public class Yolov5TFLiteDetector {
         // Initialise the model
         try {
 
+            Log.i("tfliteSupport", "Success reading model: " + MODEL_SOURCE + MODEL_FILE);
             ByteBuffer tfliteModel = FileUtil.loadMappedFile(activity, MODEL_SOURCE + MODEL_FILE);
             tflite = new Interpreter(tfliteModel, options);
-            Log.i("tfliteSupport", "Success reading model: " + MODEL_SOURCE + MODEL_FILE);
 
-            associatedAxisLabels = FileUtil.loadLabels(activity, LABEL_FILE);
-            Log.i("tfliteSupport", "Success reading label: " + LABEL_FILE);
-
+            Log.i("tfliteSupport", "Success reading label: " + MODEL_SOURCE + LABEL_FILE);
+            associatedAxisLabels = FileUtil.loadLabels(activity, MODEL_SOURCE + LABEL_FILE);
         } catch (IOException e) {
             Log.e("tfliteSupport", "Error reading model or label: ", e);
             Toast.makeText(activity, "load model error: " + e.getMessage(), Toast.LENGTH_LONG).show();
@@ -168,7 +172,7 @@ public class Yolov5TFLiteDetector {
         // yolov5s-tflite的输入是:[1, 320, 320,3], 摄像头每一帧图片需要resize,再归一化
         TensorImage yolov5sTfliteInput;
         ImageProcessor imageProcessor;
-        if(IS_INT8){
+        if (IS_INT8) {
             imageProcessor =
                     new ImageProcessor.Builder()
                             .add(new ResizeOp(INPNUT_SIZE.getHeight(), INPNUT_SIZE.getWidth(), ResizeOp.ResizeMethod.BILINEAR))
@@ -177,7 +181,7 @@ public class Yolov5TFLiteDetector {
                             .add(new CastOp(DataType.UINT8))
                             .build();
             yolov5sTfliteInput = new TensorImage(DataType.UINT8);
-        }else{
+        } else {
             imageProcessor =
                     new ImageProcessor.Builder()
                             .add(new ResizeOp(INPNUT_SIZE.getHeight(), INPNUT_SIZE.getWidth(), ResizeOp.ResizeMethod.BILINEAR))
@@ -189,12 +193,11 @@ public class Yolov5TFLiteDetector {
         yolov5sTfliteInput.load(bitmap);
         yolov5sTfliteInput = imageProcessor.process(yolov5sTfliteInput);
 
-
         // yolov5s-tflite的输出是:[1, 6300, 85], 可以从v5的GitHub release处找到相关tflite模型, 输出是[0,1], 处理到320.
         TensorBuffer probabilityBuffer;
-        if(IS_INT8){
+        if (IS_INT8) {
             probabilityBuffer = TensorBuffer.createFixedSize(OUTPUT_SIZE, DataType.UINT8);
-        }else{
+        } else {
             probabilityBuffer = TensorBuffer.createFixedSize(OUTPUT_SIZE, DataType.FLOAT32);
         }
 
@@ -205,7 +208,7 @@ public class Yolov5TFLiteDetector {
         }
 
         // 这里输出反量化,需要是模型tflite.run之后执行.
-        if(IS_INT8){
+        if (IS_INT8) {
             TensorProcessor tensorProcessor = new TensorProcessor.Builder()
                     .add(new DequantizeOp(output5SINT8QuantParams.getZeroPoint(), output5SINT8QuantParams.getScale()))
                     .build();
@@ -241,7 +244,6 @@ public class Yolov5TFLiteDetector {
                 }
             }
 
-
             Recognition r = new Recognition(
                     labelId,
                     "",
@@ -259,7 +261,7 @@ public class Yolov5TFLiteDetector {
         ArrayList<Recognition> nmsFilterBoxDuplicationRecognitions = nmsAllClass(nmsRecognitions);
 
         // 更新label信息
-        for(Recognition recognition : nmsFilterBoxDuplicationRecognitions){
+        for (Recognition recognition : nmsFilterBoxDuplicationRecognitions) {
             int labelId = recognition.getLabelId();
             String labelName = associatedAxisLabels.get(labelId);
             recognition.setLabelName(labelName);
@@ -278,7 +280,7 @@ public class Yolov5TFLiteDetector {
         ArrayList<Recognition> nmsRecognitions = new ArrayList<Recognition>();
 
         // 遍历每个类别, 在每个类别下做nms
-        for (int i = 0; i < OUTPUT_SIZE[2]-5; i++) {
+        for (int i = 0; i < OUTPUT_SIZE[2] - 5; i++) {
             // 这里为每个类别做一个队列, 把labelScore高的排前面
             PriorityQueue<Recognition> pq =
                     new PriorityQueue<Recognition>(
@@ -365,7 +367,6 @@ public class Yolov5TFLiteDetector {
         return nmsRecognitions;
     }
 
-
     protected float boxIou(RectF a, RectF b) {
         float intersection = boxIntersection(a, b);
         float union = boxUnion(a, b);
@@ -378,7 +379,7 @@ public class Yolov5TFLiteDetector {
         float maxTop = a.top > b.top ? a.top : b.top;
         float minRight = a.right < b.right ? a.right : b.right;
         float minBottom = a.bottom < b.bottom ? a.bottom : b.bottom;
-        float w = minRight -  maxLeft;
+        float w = minRight - maxLeft;
         float h = minBottom - maxTop;
 
         if (w < 0 || h < 0) return 0;
@@ -418,7 +419,7 @@ public class Yolov5TFLiteDetector {
      */
     public void addGPUDelegate() {
         CompatibilityList compatibilityList = new CompatibilityList();
-        if(compatibilityList.isDelegateSupportedOnThisDevice()){
+        if (compatibilityList.isDelegateSupportedOnThisDevice()) {
             GpuDelegate.Options delegateOptions = compatibilityList.getBestOptionsForThisDevice();
             GpuDelegate gpuDelegate = new GpuDelegate(delegateOptions);
             options.addDelegate(gpuDelegate);
@@ -430,6 +431,7 @@ public class Yolov5TFLiteDetector {
 
     /**
      * 添加线程数
+     *
      * @param thread
      */
     public void addThread(int thread) {
