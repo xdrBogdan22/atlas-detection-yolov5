@@ -81,7 +81,6 @@
             android:text="heigth x width"
             android:textColor="#FFFFFF" />
 
-
         <TextView
             android:id="@+id/immersive_name"
             android:layout_width="wrap_content"
@@ -136,8 +135,15 @@
             app:layout_constraintBottom_toTopOf="@id/model_name"
             app:layout_constraintLeft_toLeftOf="parent" />
 
+        <Spinner
+            android:id="@+id/model_selector"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/btn_dropdown"
+            android:entries="@array/model_ml"
+            android:spinnerMode="dropdown"
+            app:layout_constraintBottom_toTopOf="@id/model_name"
+            app:layout_constraintLeft_toLeftOf="parent" />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>

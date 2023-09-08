@@ -29,10 +29,14 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean IS_FULL_SCREEN = false;
 
+    private final String DEFAULT_MODEL_NAME = "yolov5n";
+    private final String DEFAULT_MODEL_SOURCE = "general/";
+
     private PreviewView cameraPreviewMatch;
     private PreviewView cameraPreviewWrap;
     private ImageView boxLabelCanvas;
     private Spinner modelSpinner;
+    private Spinner modelSelector;
     private Switch immersive;
     private TextView inferenceTimeTextView;
     private TextView frameSizeTextView;
@@ -41,9 +45,11 @@ public class MainActivity extends AppCompatActivity {
 
     private CameraProcess cameraProcess = new CameraProcess();
 
+    private String model = DEFAULT_MODEL_NAME;
+    private String source = DEFAULT_MODEL_SOURCE;
+
     /**
      * 获取屏幕旋转角度,0表示拍照出来的图片是横屏
-     *
      */
     protected int getScreenOrientation() {
         switch (getWindowManager().getDefaultDisplay().getRotation()) {
@@ -63,11 +69,12 @@ public class MainActivity extends AppCompatActivity {
      *
      * @param modelName
      */
-    private void initModel(String modelName) {
+    private void initModel(String modelName, String modelSource) {
         // 加载模型
         try {
             this.yolov5TFLiteDetector = new Yolov5TFLiteDetector();
             this.yolov5TFLiteDetector.setModelFile(modelName);
+            this.yolov5TFLiteDetector.setModelSource(modelSource);
 //            this.yolov5TFLiteDetector.addNNApiDelegate();
             this.yolov5TFLiteDetector.addGPUDelegate();
             this.yolov5TFLiteDetector.initialModel(this);
@@ -100,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
 
         // 下拉按钮
         modelSpinner = findViewById(R.id.model);
+        modelSelector = findViewById(R.id.model_selector);
 
         // 沉浸式体验按钮
         immersive = findViewById(R.id.immersive);
@@ -120,17 +128,17 @@ public class MainActivity extends AppCompatActivity {
 
         cameraProcess.showCameraSupportSize(MainActivity.this);
 
-        // 初始化加载yolov5s
-        initModel("yolov5n");
+        // DEFAULT CALL
+        initModel(DEFAULT_MODEL_NAME, DEFAULT_MODEL_SOURCE);
 
         // 监听模型切换按钮
         modelSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                String model = (String) adapterView.getItemAtPosition(i);
+                model = (String) adapterView.getItemAtPosition(i);
                 Toast.makeText(MainActivity.this, "loading model: " + model, Toast.LENGTH_LONG).show();
-                initModel(model);
-                if(IS_FULL_SCREEN){
+                initModel(model, source);
+                if (IS_FULL_SCREEN) {
                     cameraPreviewWrap.removeAllViews();
                     FullScreenAnalyse fullScreenAnalyse = new FullScreenAnalyse(MainActivity.this,
                             cameraPreviewMatch,
@@ -140,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
                             frameSizeTextView,
                             yolov5TFLiteDetector);
                     cameraProcess.startCamera(MainActivity.this, fullScreenAnalyse, cameraPreviewMatch);
-                }else{
+                } else {
                     cameraPreviewMatch.removeAllViews();
                     FullImageAnalyse fullImageAnalyse = new FullImageAnalyse(
                             MainActivity.this,
@@ -152,11 +160,46 @@ public class MainActivity extends AppCompatActivity {
                             yolov5TFLiteDetector);
                     cameraProcess.startCamera(MainActivity.this, fullImageAnalyse, cameraPreviewWrap);
                 }
-
-
             }
+
             @Override
             public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+        modelSelector.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                source = (String) parent.getItemAtPosition(position);
+                Toast.makeText(MainActivity.this, "loading model: " + model, Toast.LENGTH_LONG).show();
+                initModel(model, source);
+                if (IS_FULL_SCREEN) {
+                    cameraPreviewWrap.removeAllViews();
+                    FullScreenAnalyse fullScreenAnalyse = new FullScreenAnalyse(MainActivity.this,
+                            cameraPreviewMatch,
+                            boxLabelCanvas,
+                            rotation,
+                            inferenceTimeTextView,
+                            frameSizeTextView,
+                            yolov5TFLiteDetector);
+                    cameraProcess.startCamera(MainActivity.this, fullScreenAnalyse, cameraPreviewMatch);
+                } else {
+                    cameraPreviewMatch.removeAllViews();
+                    FullImageAnalyse fullImageAnalyse = new FullImageAnalyse(
+                            MainActivity.this,
+                            cameraPreviewWrap,
+                            boxLabelCanvas,
+                            rotation,
+                            inferenceTimeTextView,
+                            frameSizeTextView,
+                            yolov5TFLiteDetector);
+                    cameraProcess.startCamera(MainActivity.this, fullImageAnalyse, cameraPreviewWrap);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
 
             }
         });
@@ -193,7 +236,5 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
-
     }
 }

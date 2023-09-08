@@ -42,8 +42,15 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.PriorityQueue;
 
-
 public class Yolov5TFLiteDetector {
+
+    private final String POLICE_PATH = "police/";
+    private final String POLICE_RO_PATH = "police-ro/";
+    private final String POLICE_INTERNATIONAL_PATH = "police-international/";
+    private final String HOLES_PATH = "holes/";
+    private final String WORKING_SIGN_PATH = "working-sign/";
+    private final String WORKING_ROAD_PATH = "working-road/";
+    private final String GENERAL_PATH = "general/";
 
     private final Size INPNUT_SIZE = new Size(320, 320);
     private final int[] OUTPUT_SIZE = new int[]{1, 6300, 8};
@@ -60,6 +67,7 @@ public class Yolov5TFLiteDetector {
     MetadataExtractor.QuantizationParams input5SINT8QuantParams = new MetadataExtractor.QuantizationParams(0.003921568859368563f, 0);
     MetadataExtractor.QuantizationParams output5SINT8QuantParams = new MetadataExtractor.QuantizationParams(0.006305381190031767f, 5);
     private String MODEL_FILE;
+    private String MODEL_SOURCE;
 
     private Interpreter tflite;
     private List<String> associatedAxisLabels;
@@ -92,6 +100,34 @@ public class Yolov5TFLiteDetector {
         }
     }
 
+    public void setModelSource(String modelSource){
+        switch (modelSource) {
+            case POLICE_PATH:
+                MODEL_SOURCE = POLICE_PATH;
+                break;
+            case POLICE_RO_PATH:
+                MODEL_FILE = POLICE_RO_PATH;
+                break;
+            case POLICE_INTERNATIONAL_PATH:
+                MODEL_FILE = POLICE_INTERNATIONAL_PATH;
+                break;
+            case HOLES_PATH:
+                MODEL_FILE = HOLES_PATH;
+                break;
+            case WORKING_SIGN_PATH:
+                MODEL_FILE = WORKING_SIGN_PATH;
+                break;
+            case WORKING_ROAD_PATH:
+                MODEL_FILE = WORKING_ROAD_PATH;
+                break;
+            case GENERAL_PATH:
+                MODEL_FILE = GENERAL_PATH;
+                break;
+            default:
+                Log.i("tfliteSupport", "Wrong path!");
+        }
+    }
+
     public String getLabelFile() {
         return this.LABEL_FILE;
     }
@@ -108,9 +144,9 @@ public class Yolov5TFLiteDetector {
         // Initialise the model
         try {
 
-            ByteBuffer tfliteModel = FileUtil.loadMappedFile(activity, MODEL_FILE);
+            ByteBuffer tfliteModel = FileUtil.loadMappedFile(activity, MODEL_SOURCE + MODEL_FILE);
             tflite = new Interpreter(tfliteModel, options);
-            Log.i("tfliteSupport", "Success reading model: " + MODEL_FILE);
+            Log.i("tfliteSupport", "Success reading model: " + MODEL_SOURCE + MODEL_FILE);
 
             associatedAxisLabels = FileUtil.loadLabels(activity, LABEL_FILE);
             Log.i("tfliteSupport", "Success reading label: " + LABEL_FILE);

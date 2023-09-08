@@ -7,4 +7,14 @@
         <item>yolov5m</item>
         <item>yolov5s-int8</item>
     </string-array>
+
+    <string-array name="model_ml">
+        <item>police/</item>
+        <item>police-ro/</item>
+        <item>police-international/</item>
+        <item>holes/</item>
+        <item>working-sign/</item>
+        <item>working-road/</item>
+        <item>general/</item>
+    </string-array>
 </resources>
