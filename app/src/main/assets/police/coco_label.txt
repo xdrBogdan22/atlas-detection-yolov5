@@ -1,3 +1,5 @@
+bus
 car
-motorbike
 police
+truck
+motorbike

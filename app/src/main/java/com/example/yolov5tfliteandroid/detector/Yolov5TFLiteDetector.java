@@ -53,7 +53,7 @@ public class Yolov5TFLiteDetector {
     private final String GENERAL_PATH = "general/";
 
     private final Size INPNUT_SIZE = new Size(320, 320);
-    private final int[] OUTPUT_SIZE = new int[]{1, 6300, 8};
+    private int[] OUTPUT_SIZE = new int[]{1, 6300, 8};
     private Boolean IS_INT8 = false;
     private final float DETECT_THRESHOLD = 0.5f;
     private final float IOU_THRESHOLD = 0.45f;
@@ -104,24 +104,31 @@ public class Yolov5TFLiteDetector {
         switch (modelSource) {
             case POLICE_PATH:
                 MODEL_SOURCE = POLICE_PATH;
+                OUTPUT_SIZE = new int[]{1, 6300, 10};
                 break;
             case POLICE_RO_PATH:
                 MODEL_SOURCE = POLICE_RO_PATH;
+                OUTPUT_SIZE = new int[]{1, 6300, 8};
                 break;
             case POLICE_INTERNATIONAL_PATH:
                 MODEL_SOURCE = POLICE_INTERNATIONAL_PATH;
+                OUTPUT_SIZE = new int[]{1, 6300, 9};
                 break;
             case HOLES_PATH:
                 MODEL_SOURCE = HOLES_PATH;
+                OUTPUT_SIZE = new int[]{1, 6300, 8};
                 break;
             case WORKING_SIGN_PATH:
                 MODEL_SOURCE = WORKING_SIGN_PATH;
+                OUTPUT_SIZE = new int[]{1, 6300, 6};
                 break;
             case WORKING_ROAD_PATH:
                 MODEL_SOURCE = WORKING_ROAD_PATH;
+                OUTPUT_SIZE = new int[]{1, 6300, 7};
                 break;
             case GENERAL_PATH:
                 MODEL_SOURCE = GENERAL_PATH;
+                OUTPUT_SIZE = new int[]{1, 6300, 85};
                 break;
             default:
                 Log.i("tfliteSupport", "Wrong path!");
