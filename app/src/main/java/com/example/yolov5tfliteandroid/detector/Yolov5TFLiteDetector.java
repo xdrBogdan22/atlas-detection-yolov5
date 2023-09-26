@@ -51,7 +51,6 @@ public class Yolov5TFLiteDetector {
     private final String WORKING_SIGN_PATH = "working-sign/";
     private final String WORKING_ROAD_PATH = "working-road/";
     private final String GENERAL_PATH = "general/";
-
     private final String GENERAL_SMALL_PATH = "general_small/";
 
     private final Size INPNUT_SIZE = new Size(320, 320);
