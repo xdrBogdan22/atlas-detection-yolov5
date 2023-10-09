@@ -133,7 +133,7 @@ public class Yolov5TFLiteDetector {
                 break;
             case GENERAL_SMALL_PATH:
                 MODEL_SOURCE = GENERAL_SMALL_PATH;
-                OUTPUT_SIZE = new int[]{1, 6300, 11};
+                OUTPUT_SIZE = new int[]{1, 6300, 15};
                 break;
             default:
                 Log.i("tfliteSupport", "Wrong path!");

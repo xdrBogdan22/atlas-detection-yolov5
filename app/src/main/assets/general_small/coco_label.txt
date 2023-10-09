@@ -1,6 +1,10 @@
-25
-Hump 
-pothole 
+Hump
+pothole
+Cone
+Drum
+Tube
 car
 motorbike
 police
+construction
+person
